@@ -82,11 +82,9 @@
         }
         .animate-in { animation: fadeInUp 0.5s ease-out forwards; }
         
-        .error-shake { animation: shake 0.4s ease-in-out; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+        .unanswered-highlight {
+            border: 2px solid #ef4444 !important;
+            background: rgba(239, 68, 68, 0.05) !important;
         }
     </style>
 </head>
@@ -108,7 +106,7 @@
             </div>
         </section>
 
-        <!-- INTRODUÇÃO (TEXTO PERSONALIZADO PELO UTILIZADOR) -->
+        <!-- INTRODUÇÃO -->
         <section id="intro-section" class="hidden-screen animate-in max-w-2xl mx-auto">
             <div class="glass-panel p-10 md:p-12 rounded-[40px] space-y-8">
                 <div class="text-center">
@@ -122,7 +120,7 @@
                     </p>
 
                     <div class="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/5">
-                        <p class="text-sm">Você deve refletir sobre sua reação a situações novas e pouco familiares e ao completar o inventário, tente distinguir:</p>
+                        <p class="text-sm">Você deve refletir sobre sua reação a situações novas e pouco familiares e ao iniciar o inventário, tente distinguir:</p>
                         <ul class="list-disc pl-5 space-y-3 text-sm text-gray-400">
                             <li>Entre o que aprendeu, ou do que se lembra, e o que lhe é <span class="text-pink-400 font-bold">natural</span></li>
                             <li>Entre o que as situações exigem de você e o que faz com seus <span class="text-pink-400 font-bold">talentos naturais</span></li>
@@ -155,7 +153,7 @@
             <div id="questions-list" class="space-y-8 mt-16 pb-32"></div>
             <div class="fixed bottom-0 left-0 w-full p-6 flex justify-center bg-gradient-to-t from-black via-black/90 to-transparent">
                 <div class="max-w-4xl w-full flex flex-col items-center gap-4">
-                    <p id="quiz-warning" class="text-pink-500 text-xs font-bold hidden animate-pulse italic">Por favor, responda a todas as questões para continuar.</p>
+                    <p id="quiz-warning" class="text-pink-500 text-xs font-bold hidden animate-pulse italic">Atenção: Existem questões sem resposta nesta página.</p>
                     <div class="w-full flex gap-4">
                         <button id="prev-btn" onclick="prevPage()" class="hidden flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl font-bold uppercase tracking-widest">Anterior</button>
                         <button id="next-btn" onclick="nextPage()" class="flex-[2] bg-indigo-600 py-4 rounded-2xl font-bold uppercase tracking-widest">Próxima Página</button>
@@ -214,7 +212,7 @@
             { id: 4, a: "Minhas novas decisões resultam de uma boa lógica que definiu o que está errado. Não sou facilmente desviado de uma resposta simples e lógica por sentimentos ou intuições.", b: "Minhas novas decisões resultam de “ver” como solucionar problemas. Eu “texto quadros mentais” de um modo que não posso descrever facilmente para chegar a duas ou três soluções completas novas.", map: {a: 'CONHECEDOR', b: 'IDEALIZADOR'} },
             { id: 5, a: "Embora eu possa dar uma reposta para um novo problema, sou melhor para formular e aperfeiçoar um plano a fim de resolvê-lo, incluindo os detalhes necessários.", b: "Embora eu possa dar uma resposta para um novo problema, sou melhor para criar uma nova direção e não tão hábil em refletir sobre os detalhes completos do plano.", map: {a: 'DELIBERADOR', b: 'IDEALIZADOR'} },
             { id: 6, a: "Sou melhor em resolver problemas complexos, tangíveis, com respostas simples e práticas. Sou mais capaz de conceber o que deve ser feito do que em levar outros a fazerem o que é necessário.", b: "Sou melhor em resolver problemas complexos com sentimentos e discernimentos. Sou melhor como parte de uma equipe ou quando incluo outros.", map: {a: 'CONHECEDOR', b: 'CONCILIADOR'} },
-            { id: 7, a: "De modo geral, reajo antes de pensar. Posso tel conhecimento dos fatos, mas minha primeira reação quase sempre reflete meus sentimentos.", b: "De modo geral, reajo depois de pensar nos fatos. Posso ter consciência dos meus sentimentos, mas minha primeira reação quase sempre reflete fatos e não emoções.", map: {a: 'CONCILIADOR', b: 'DELIBERADOR'} },
+            { id: 7, a: "De modo geral, reajo antes de pensar. Posso ter conhecimento dos fatos, mas minha primeira reação quase sempre reflete meus sentimentos.", b: "De modo geral, reajo depois de pensar nos fatos. Posso ter consciência dos meus sentimentos, mas minha primeira reação quase sempre reflete fatos e não emoções.", map: {a: 'CONCILIADOR', b: 'DELIBERADOR'} },
             { id: 8, a: "Sou naturalmente eficiente. Chego rapidamente às conclusões, especialmente nas novas áreas.", b: "Sou naturalmente detalhista. Colho informações nas áreas novas, a fim de assegurar exatidão antes de decidir.", map: {a: 'CONHECEDOR', b: 'DELIBERADOR'} },
             { id: 9, a: "Quando trato de um problema desconhecido, tipicamente descubro novas formas de aplicar o que sei. A solução é prática e faz sentido imediato.", b: "Quando trato de um problema desconhecido, tipicamente reúno informações contraditórias para ultrapassar o que já é conhecido. A seguir, ofereço uma direção geral sobre como resolver o problema.", map: {a: 'CONHECEDOR', b: 'IDEALIZADOR'} },
             { id: 10, a: "A princípio, tomo mais consciência das reações não verbais do que dos fatos em uma situação nova.", b: "A princípio, tomo mais consciência dos fatos em uma situação nova do que das reações não verbais.", map: {a: 'CONCILIADOR', b: 'CONHECEDOR'} },
@@ -270,13 +268,14 @@
             document.getElementById('intro-section').classList.add('hidden-screen');
             document.getElementById('quiz-section').classList.remove('hidden-screen');
             renderPage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function renderPage() {
             const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
             const currentQuestions = DATA.slice(start, start + QUESTIONS_PER_PAGE);
             document.getElementById('questions-list').innerHTML = currentQuestions.map(q => `
-                <div class="glass-panel p-6 rounded-[32px] animate-in">
+                <div id="q-container-${q.id}" class="glass-panel p-6 rounded-[32px] animate-in transition-all">
                     <p class="text-[10px] font-black text-gray-500 mb-4 uppercase tracking-[0.2em]">Questão ${q.id}</p>
                     <div class="grid md:grid-cols-2 gap-4">
                         <div id="q${q.id}a" onclick="pick(${q.id}, 'a')" class="glass-card p-5 rounded-2xl ${userAnswers[q.id] === 'a' ? 'selected' : ''}">
@@ -286,7 +285,6 @@
                             <div class="option-label">B</div><p class="text-sm">${q.b}</p>
                         </div>
                     </div>
-                    <!-- OPÇÃO NÃO ME IDENTIFICO -->
                     <div class="mt-4 flex justify-center">
                         <button onclick="pick(${q.id}, 'none')" class="text-[10px] uppercase font-bold tracking-widest px-4 py-2 rounded-lg transition-all border ${userAnswers[q.id] === 'none' ? 'border-pink-500/50 bg-pink-500/10 text-pink-400' : 'border-white/5 text-gray-500 hover:text-gray-300'}">
                             Não me identifico com nenhuma das declarações
@@ -299,10 +297,32 @@
 
         function pick(id, opt) {
             userAnswers[id] = opt;
-            document.getElementById('quiz-warning').classList.add('hidden');
+            const container = document.getElementById(`q-container-${id}`);
+            if(container) container.classList.remove('unanswered-highlight');
+            
+            checkPageAnswers();
             renderPage();
+            
             const count = Object.keys(userAnswers).length;
             document.getElementById('progress-fill').style.width = `${(count / 18) * 100}%`;
+        }
+
+        function checkPageAnswers() {
+            const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
+            const end = start + QUESTIONS_PER_PAGE;
+            let allAnswered = true;
+            
+            for (let i = start + 1; i <= end; i++) {
+                if (!userAnswers[i]) {
+                    allAnswered = false;
+                    break;
+                }
+            }
+            
+            if (allAnswered) {
+                document.getElementById('quiz-warning').classList.add('hidden');
+            }
+            return allAnswered;
         }
 
         function updateControls() {
@@ -312,19 +332,50 @@
             document.getElementById('finish-btn').classList.toggle('hidden', currentPage !== 3);
         }
 
-        function nextPage() { 
-            if (currentPage < 3) { currentPage++; renderPage(); window.scrollTo(0,0); } 
+        function highlightUnanswered() {
+            const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
+            const end = start + QUESTIONS_PER_PAGE;
+            let firstUnanswered = null;
+
+            for (let i = start + 1; i <= end; i++) {
+                const container = document.getElementById(`q-container-${i}`);
+                if (!userAnswers[i]) {
+                    if(container) container.classList.add('unanswered-highlight');
+                    if (!firstUnanswered) firstUnanswered = container;
+                } else {
+                    if(container) container.classList.remove('unanswered-highlight');
+                }
+            }
+
+            if (firstUnanswered) {
+                firstUnanswered.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('quiz-warning').classList.remove('hidden');
+            }
         }
-        function prevPage() { if (currentPage > 1) { currentPage--; renderPage(); window.scrollTo(0,0); } }
+
+        function nextPage() { 
+            if (checkPageAnswers()) {
+                if (currentPage < 3) { 
+                    currentPage++; 
+                    renderPage(); 
+                    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+                } 
+            } else {
+                highlightUnanswered();
+            }
+        }
+
+        function prevPage() { 
+            if (currentPage > 1) { 
+                currentPage--; 
+                renderPage(); 
+                window.scrollTo({ top: 0, behavior: 'smooth' }); 
+            } 
+        }
 
         function processResults() {
-            const totalAnswered = Object.keys(userAnswers).length;
-            
-            if (totalAnswered < 18) {
-                const warning = document.getElementById('quiz-warning');
-                warning.classList.remove('hidden');
-                warning.classList.add('error-shake');
-                setTimeout(() => warning.classList.remove('error-shake'), 400);
+            if (!checkPageAnswers()) {
+                highlightUnanswered();
                 return;
             }
 
@@ -345,6 +396,7 @@
             
             document.getElementById('quiz-section').classList.add('hidden-screen');
             document.getElementById('result-section').classList.remove('hidden-screen');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             
             const p = PROFILES[win];
             document.getElementById('result-title').innerText = p.title;
@@ -359,7 +411,6 @@
                 card.classList.remove('bg-pink-500/20', 'border-pink-500/50');
                 if(k === win) card.classList.add('bg-pink-500/20', 'border-pink-500/50');
             });
-            window.scrollTo(0,0);
         }
     </script>
 </body>
