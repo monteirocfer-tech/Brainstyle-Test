@@ -82,15 +82,9 @@
         }
         .animate-in { animation: fadeInUp 0.5s ease-out forwards; }
 
-        .profile-tag {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .balance-alert {
+            background: linear-gradient(90deg, rgba(244, 114, 182, 0.1), rgba(129, 204, 248, 0.1));
+            border: 1px dashed rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
@@ -118,16 +112,35 @@
                 <div class="border-b border-white/10 pb-6">
                     <h2 class="text-3xl font-black mb-4">Bem-vindo ao Inventário</h2>
                     <p class="text-gray-300 leading-relaxed mb-4">
-                        Esse inventário tem 18 pares de declarações. Escolha a alternativa (A ou B) que melhor lhe descreve.
+                        Esse inventário tem 18 pares de declarações. Para cada par, escolha a alternativa (A ou B) que melhor lhe descreva, utilizando a seguinte escala:
+                    </p>
+                    <div class="p-4 bg-white/5 rounded-2xl border border-white/5 flex flex-wrap gap-4 text-sm font-bold">
+                        <span class="text-pink-400">A = se A descrever você melhor do que B</span>
+                        <span class="text-indigo-400">B = se B descrever você melhor do que A</span>
+                    </div>
+                    <p class="text-gray-400 mt-6 text-sm leading-relaxed italic">
+                        Muitas pessoas perceberão ter ambas as reações para situações diferentes. O importante é qual vem primeiro ou mais naturalmente - em especial em uma situação desconhecida antes de usarmos o que poderíamos ter aprendido a fazer. Se nenhuma parecer sua reação natural, deixe a alternativa em branco, sem selecionar. Não existe brainstyle melhor ou mais inteligente que outro. Cada força tem suas vantagens e desvantagens!
                     </p>
                 </div>
+
+                <div>
+                    <h3 class="text-indigo-400 text-xs font-black uppercase tracking-widest mb-4">ORIENTAÇÕES PARA REALIZAR O TESTE!</h3>
+                    <p class="text-gray-300 text-sm mb-4">Você deve refletir sobre sua reação a situações novas e pouco familiares e, ao completar o inventário, tente distinguir:</p>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li class="flex items-start gap-3"><span class="text-pink-500">•</span> Entre o que aprendeu, ou do que se lembra, e o que lhe é natural</li>
+                        <li class="flex items-start gap-3"><span class="text-pink-500">•</span> Entre o que as situações exigem de você e o que faz com seus talentos naturais</li>
+                        <li class="flex items-start gap-3"><span class="text-pink-500">•</span> Entre como quer ser visto e como você realmente é</li>
+                    </ul>
+                </div>
+
                 <div class="pt-6">
+                    <p class="text-center font-bold mb-6">Não existe resposta certa ou errada. Para identificar seu brainstyle, responda sinceramente a cada item.</p>
                     <button onclick="startQuiz()" class="w-full bg-gradient-to-r from-pink-500 to-indigo-600 py-4 rounded-2xl font-bold uppercase tracking-widest">Começar Inventário</button>
                 </div>
             </div>
         </section>
 
-        <!-- QUESTIONÁRIO -->
+        <!-- QUESTIONÁRIO (PAGINADO) -->
         <section id="quiz-section" class="hidden-screen flex-1 pt-10">
             <div class="fixed top-0 left-0 w-full glass-panel z-50 px-6 py-4 flex justify-center">
                 <div class="max-w-4xl w-full flex items-center justify-between">
@@ -135,50 +148,48 @@
                     <div id="progress-bar" class="flex-1 mx-8 h-1 bg-white/10 rounded-full overflow-hidden">
                         <div id="progress-fill" class="h-full bg-pink-500 transition-all duration-500" style="width: 0%"></div>
                     </div>
+                    <span id="progress-indicator" class="text-[10px] font-bold uppercase text-gray-500">Respondidas: 0/18</span>
                 </div>
             </div>
+
             <div id="questions-list" class="space-y-8 mt-16 pb-32"></div>
+
             <div class="fixed bottom-0 left-0 w-full p-6 flex justify-center bg-gradient-to-t from-black via-black/90 to-transparent">
                 <div class="max-w-4xl w-full flex gap-4">
                     <button id="prev-btn" onclick="prevPage()" class="hidden flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl font-bold uppercase tracking-widest">Anterior</button>
-                    <button id="next-btn" onclick="nextPage()" class="flex-[2] bg-indigo-600 py-4 rounded-2xl font-bold uppercase tracking-widest">Próxima Página</button>
-                    <button id="finish-btn" onclick="processResults()" class="hidden flex-[2] bg-pink-500 py-4 rounded-2xl font-bold uppercase tracking-widest">Finalizar</button>
+                    <button id="next-btn" onclick="nextPage()" class="flex-[2] bg-indigo-600 py-4 rounded-2xl font-bold uppercase tracking-widest hover:bg-indigo-500 transition-all">Próxima Página</button>
+                    <button id="finish-btn" onclick="processResults()" class="hidden flex-[2] bg-pink-500 py-4 rounded-2xl font-bold uppercase tracking-widest hover:bg-pink-600 transition-all">Finalizar e Ver Perfil</button>
                 </div>
             </div>
         </section>
 
         <!-- RESULTADOS -->
         <section id="result-section" class="hidden-screen animate-in">
-            <div class="glass-panel rounded-[40px] overflow-hidden p-8 md:p-12">
-                <div class="text-center mb-10">
-                    <span class="text-pink-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4 block">Seu Perfil Dominante</span>
-                    <h2 id="result-title" class="text-5xl font-black mb-2">...</h2>
-                    <p id="result-subtitle" class="text-indigo-400 font-bold uppercase tracking-widest text-xs"></p>
+            <div class="glass-panel rounded-[40px] overflow-hidden p-8 md:p-16">
+                <div id="balance-notice" class="hidden mb-8 p-6 rounded-2xl balance-alert text-center animate-in">
+                    <div class="flex items-center justify-center gap-3 text-indigo-300 font-bold mb-1">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Nota de Versatilidade
+                    </div>
+                    <p class="text-gray-400 text-sm">Identificámos um equilíbrio notável entre os seus perfis dominantes. Isto indica que possui uma grande flexibilidade cognitiva para alternar entre diferentes formas de processar informação.</p>
+                </div>
+
+                <div class="text-center mb-12">
+                    <span class="text-pink-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4 block">Resultado Consolidado</span>
+                    <h2 id="result-title" class="text-5xl md:text-6xl font-black mb-4">...</h2>
+                    <p id="result-subtitle" class="text-gray-400 text-lg"></p>
                 </div>
                 
-                <div class="grid md:grid-cols-3 gap-6 mb-12">
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <h4 class="text-pink-400 text-[10px] font-black uppercase mb-3">No tempo zero</h4>
-                        <p id="res-tempo" class="text-sm text-gray-300"></p>
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <h4 class="text-pink-400 text-[10px] font-black uppercase mb-3">A impressão de</h4>
-                        <ul id="res-impressao" class="text-xs text-gray-400 space-y-2 list-disc pl-4"></ul>
-                    </div>
-                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
-                        <h4 class="text-pink-400 text-[10px] font-black uppercase mb-3">Forças Essenciais</h4>
-                        <ul id="res-forcas" class="text-xs text-gray-400 space-y-2 list-disc pl-4"></ul>
-                    </div>
-                </div>
+                <div id="result-description" class="text-gray-300 leading-relaxed mb-12 space-y-4"></div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/5 pt-8">
-                    <div class="text-center p-4 rounded-2xl" id="card-DELIBERADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Deliberador</p><p id="sc-DELIBERADOR" class="text-2xl font-black">0</p></div>
-                    <div class="text-center p-4 rounded-2xl" id="card-CONHECEDOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Conhecedor</p><p id="sc-CONHECEDOR" class="text-2xl font-black">0</p></div>
-                    <div class="text-center p-4 rounded-2xl" id="card-IDEALIZADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Idealizador</p><p id="sc-IDEALIZADOR" class="text-2xl font-black">0</p></div>
-                    <div class="text-center p-4 rounded-2xl" id="card-CONCILIADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Conciliador</p><p id="sc-CONCILIADOR" class="text-2xl font-black">0</p></div>
+                    <div class="text-center p-4 rounded-2xl transition-all border border-transparent" id="card-DELIBERADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Deliberador</p><p id="sc-DELIBERADOR" class="text-2xl font-black">0</p></div>
+                    <div class="text-center p-4 rounded-2xl transition-all border border-transparent" id="card-CONHECEDOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Conhecedor</p><p id="sc-CONHECEDOR" class="text-2xl font-black">0</p></div>
+                    <div class="text-center p-4 rounded-2xl transition-all border border-transparent" id="card-IDEALIZADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Idealizador</p><p id="sc-IDEALIZADOR" class="text-2xl font-black">0</p></div>
+                    <div class="text-center p-4 rounded-2xl transition-all border border-transparent" id="card-CONCILIADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Conciliador</p><p id="sc-CONCILIADOR" class="text-2xl font-black">0</p></div>
                 </div>
 
-                <button onclick="window.location.reload()" class="mt-12 w-full py-4 rounded-xl bg-white/5 border border-white/10 font-bold uppercase tracking-widest">Reiniciar</button>
+                <button onclick="window.location.reload()" class="mt-12 w-full py-4 rounded-xl bg-white/5 border border-white/10 font-bold uppercase tracking-widest hover:bg-white/10 transition-all">Reiniciar Teste</button>
             </div>
         </section>
     </div>
@@ -189,6 +200,7 @@
         let currentPage = 1;
         let userAnswers = {};
 
+        // Mapeamento extraído da tabela de conferência literal
         const DATA = [
             { id: 1, a: "Em uma nova situação, minhas primeiras reações são sentimentos sobre coisas. Só mais tarde eu me torno mais objetivo e reflito melhor.", b: "Em uma nova situação, considero primeiro os fatos. Posso ter consciência dos meus sentimentos, mas quase sempre penso antes de responder.", map: {a: 'CONCILIADOR', b: 'DELIBERADOR'} },
             { id: 2, a: "Sou naturalmente inventivo. Desenvolvo soluções novas e completas para problemas complexos, mais rapidamente do que faço relacionamentos.", b: "Sou naturalmente amigável, faço relacionamentos mais depressa e mais facilmente do que consigo desenvolver soluções novas e completas para problemas complexos.", map: {a: 'IDEALIZADOR', b: 'CONCILIADOR'} },
@@ -197,7 +209,7 @@
             { id: 5, a: "Embora eu possa dar uma reposta para um novo problema, sou melhor para formular e aperfeiçoar um plano a fim de resolvê-lo, incluindo os detalhes necessários.", b: "Embora eu possa dar uma resposta para um novo problema, sou melhor para criar uma nova direção e não tão hábil em refletir sobre os detalhes completos do plano.", map: {a: 'DELIBERADOR', b: 'IDEALIZADOR'} },
             { id: 6, a: "Sou melhor em resolver problemas complexos, tangíveis, com respostas simples e práticas. Sou mais capaz de conceber o que deve ser feito do que em levar outros a fazerem o que é necessário.", b: "Sou melhor em resolver problemas complexos com sentimentos e discernimentos. Sou melhor como parte de uma equipe ou quando incluo outros.", map: {a: 'CONHECEDOR', b: 'CONCILIADOR'} },
             { id: 7, a: "De modo geral, reajo antes de pensar. Posso ter conhecimento dos fatos, mas minha primeira reação quase sempre reflete meus sentimentos.", b: "De modo geral, reajo depois de pensar nos fatos. Posso ter consciência dos meus sentimentos, mas minha primeira reação quase sempre reflete fatos e não emoções.", map: {a: 'CONCILIADOR', b: 'DELIBERADOR'} },
-            { id: 8, a: "Sou naturally eficiente. Chego rapidamente às conclusões, especialmente nas novas áreas.", b: "Sou naturalmente detalhista. Colho informações nas áreas novas, a fim de assegurar exatidão antes de decidir.", map: {a: 'CONHECEDOR', b: 'DELIBERADOR'} },
+            { id: 8, a: "Sou naturalmente eficiente. Chego rapidamente às conclusões, especialmente nas novas áreas.", b: "Sou naturalmente detalhista. Colho informações nas áreas novas, a fim de assegurar exatidão antes de decidir.", map: {a: 'CONHECEDOR', b: 'DELIBERADOR'} },
             { id: 9, a: "Quando trato de um problema desconhecido, tipicamente descubro novas formas de aplicar o que sei. A solução é prática e faz sentido imediato.", b: "Quando trato de um problema desconhecido, tipicamente reúno informações contraditórias para ultrapassar o que já é conhecido. A seguir, ofereço uma direção geral sobre como resolver o problema.", map: {a: 'CONHECEDOR', b: 'IDEALIZADOR'} },
             { id: 10, a: "A princípio, tomo mais consciência das reações não verbais do que dos fatos em uma situação nova.", b: "A princípio, tomo mais consciência dos fatos em uma situação nova do que das reações não verbais.", map: {a: 'CONCILIADOR', b: 'CONHECEDOR'} },
             { id: 11, a: "Inicialmente, minhas novas ideias são tão incomuns ou conceituais que as pessoas têm dificuldade para aceitá-las. Posso criar uma nova direção sem considerar o apoio delas.", b: "Inicialmente, quero que todos gostem de mim e de minhas ideias. Sou melhor em criar uma nova direção quando outros apoiam minhas ideias.", map: {a: 'IDEALIZADOR', b: 'CONCILIADOR'} },
@@ -211,37 +223,20 @@
         ];
 
         const PROFILES = {
-            DELIBERADOR: { 
-                title: "Deliberador(a)", 
-                tempo: "Pensa antes de reagir",
-                impressao: ["Indagador desafiador", "Conhecedor", "Indiferente ou pensativa a princípio", "Complexa e Analítica", "Indutiva"],
-                forcas: ["Alguém que avalia as coisas primeiro e depois aprende", "Usa análise passo a passo para chegar a uma visão geral", "Um planejador", "Uma pessoa multifacetada"]
-            },
-            CONHECEDOR: { 
-                title: "Conhecedor(a)", 
-                tempo: "Resposta lógica, clara",
-                impressao: ["Conclusiva", "Tomada de decisões não emocionais", "Confrontativa", "Simplificada", "Dedutiva"],
-                forcas: ["Alguém que explica as coisas primeiro, sem emoção", "Uma pessoa que vai para a causa e apresenta soluções simples", "Uma pessoa que conserta coisas", "Alguém que soluciona problemas", "Uma pessoa lógica"]
-            },
-            IDEALIZADOR: { 
-                title: "Idealizador(a)", 
-                tempo: "Resposta generalizada ou vaga",
-                impressao: ["Suposição ampla, sem fatos, um estereótipo", "Exploradora de possibilidades", "Inventiva, porém estratégica", "Distante e Dedutiva"],
-                forcas: ["Alguém que propõe soluções e depois as experimenta", "Uma pessoa inventiva, difícil de entender a princípio", "Aceita riscos", "Procura caminhos", "Um visionário"]
-            },
-            CONCILIADOR: { 
-                title: "Conciliador(a)", 
-                tempo: "Reações ou respostas rápidas",
-                impressao: ["Espontânea", "Tomada de decisões rápidas e depois muda as mesmas, age rapidamente", "Mais imaginativa que estratégica", "Informativa, amigável, conversadora, indutiva"],
-                forcas: ["Alguém que imagina rapidamente possibilidades", "Uma pessoa emocional, intuitiva", "Alguém que toma decisões e depois muda de ideia", "Um influenciador, carismático", "Uma pessoa sociável", "Uma pessoa inspiradora"]
-            }
+            DELIBERADOR: { title: "Deliberador", sub: "Analítico e Estratégico", desc: "Você prefere processar informações com cautela e basear suas decisões em dados e reflexão profunda." },
+            CONHECEDOR: { title: "Conhecedor", sub: "Lógico e Pragmático", desc: "Seu foco está na eficiência e na resolução direta de problemas através da lógica aplicada." },
+            IDEALIZADOR: { title: "Idealizador", sub: "Visionário e Criativo", desc: "Você foca no futuro e nas possibilidades, preferindo soluções inovadoras e conceituais." },
+            CONCILIADOR: { title: "Conciliador", sub: "Empático e Intuitivo", desc: "Sua força reside nas conexões humanas, usando a intuição e a empatia para guiar suas ações." }
         };
 
         function checkAuth() {
-            if (document.getElementById('pass-input').value === AUTH_KEY) {
+            const val = document.getElementById('pass-input').value;
+            if (val === AUTH_KEY) {
                 document.getElementById('login-section').classList.add('hidden-screen');
                 document.getElementById('intro-section').classList.remove('hidden-screen');
-            } else { document.getElementById('error-msg').classList.remove('hidden'); }
+            } else { 
+                document.getElementById('error-msg').classList.remove('hidden'); 
+            }
         }
 
         function startQuiz() {
@@ -252,59 +247,113 @@
 
         function renderPage() {
             const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
-            const currentQuestions = DATA.slice(start, start + QUESTIONS_PER_PAGE);
-            document.getElementById('questions-list').innerHTML = currentQuestions.map(q => `
-                <div class="glass-panel p-6 rounded-[32px] animate-in">
-                    <p class="text-[10px] font-black text-gray-500 mb-4 uppercase tracking-[0.2em]">Questão ${q.id}</p>
+            const end = start + QUESTIONS_PER_PAGE;
+            const currentQuestions = DATA.slice(start, end);
+
+            const container = document.getElementById('questions-list');
+            container.innerHTML = currentQuestions.map(q => `
+                <div class="glass-panel p-6 md:p-8 rounded-[32px] animate-in">
+                    <p class="text-[10px] font-black text-gray-500 mb-6 uppercase tracking-[0.2em]">Declaração ${q.id}</p>
                     <div class="grid md:grid-cols-2 gap-4">
-                        <div id="q${q.id}a" onclick="pick(${q.id}, 'a')" class="glass-card p-5 rounded-2xl ${userAnswers[q.id] === 'a' ? 'selected' : ''}">
-                            <div class="option-label">A</div><p class="text-sm">${q.a}</p>
+                        <div id="q${q.id}a" onclick="pick(${q.id}, 'a')" class="glass-card p-6 rounded-2xl ${userAnswers[q.id] === 'a' ? 'selected' : ''}">
+                            <div class="option-label">A</div>
+                            <p class="text-sm leading-relaxed">${q.a}</p>
                         </div>
-                        <div id="q${q.id}b" onclick="pick(${q.id}, 'b')" class="glass-card p-5 rounded-2xl ${userAnswers[q.id] === 'b' ? 'selected' : ''}">
-                            <div class="option-label">B</div><p class="text-sm">${q.b}</p>
+                        <div id="q${q.id}b" onclick="pick(${q.id}, 'b')" class="glass-card p-6 rounded-2xl ${userAnswers[q.id] === 'b' ? 'selected' : ''}">
+                            <div class="option-label">B</div>
+                            <p class="text-sm leading-relaxed">${q.b}</p>
                         </div>
                     </div>
                 </div>
             `).join('');
+
             updateControls();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function pick(id, opt) {
             userAnswers[id] = opt;
-            renderPage();
+            document.getElementById(`q${id}a`).classList.remove('selected');
+            document.getElementById(`q${id}b`).classList.remove('selected');
+            document.getElementById(`q${id}${opt}`).classList.add('selected');
+            
             const count = Object.keys(userAnswers).length;
+            document.getElementById('progress-indicator').innerText = `Respondidas: ${count}/18`;
             document.getElementById('progress-fill').style.width = `${(count / 18) * 100}%`;
         }
 
         function updateControls() {
             document.getElementById('page-indicator').innerText = `Página ${currentPage} de 3`;
             document.getElementById('prev-btn').classList.toggle('hidden', currentPage === 1);
-            document.getElementById('next-btn').classList.toggle('hidden', currentPage === 3);
-            document.getElementById('finish-btn').classList.toggle('hidden', currentPage !== 3);
+            
+            if (currentPage === 3) {
+                document.getElementById('next-btn').classList.add('hidden');
+                document.getElementById('finish-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('next-btn').classList.remove('hidden');
+                document.getElementById('finish-btn').classList.add('hidden');
+            }
         }
 
-        function nextPage() { if (currentPage < 3) { currentPage++; renderPage(); } }
-        function prevPage() { if (currentPage > 1) { currentPage--; renderPage(); } }
+        function nextPage() {
+            if (currentPage < 3) {
+                currentPage++;
+                renderPage();
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderPage();
+            }
+        }
 
         function processResults() {
             const scores = { DELIBERADOR: 0, CONHECEDOR: 0, IDEALIZADOR: 0, CONCILIADOR: 0 };
-            Object.entries(userAnswers).forEach(([id, opt]) => scores[DATA[id-1].map[opt]]++);
-            const win = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            Object.entries(userAnswers).forEach(([id, opt]) => {
+                const profile = DATA[id-1].map[opt];
+                scores[profile]++;
+            });
+
+            const maxScore = Math.max(...Object.values(scores));
+            const winners = Object.keys(scores).filter(k => scores[k] === maxScore);
+            const mainWinner = winners[0]; 
             
+            showResult(mainWinner, scores, winners.length > 1);
+        }
+
+        function showResult(win, scs, isBalanced) {
             document.getElementById('quiz-section').classList.add('hidden-screen');
             document.getElementById('result-section').classList.remove('hidden-screen');
             
-            const p = PROFILES[win];
-            document.getElementById('result-title').innerText = p.title;
-            document.getElementById('res-tempo').innerText = p.tempo;
-            document.getElementById('res-impressao').innerHTML = p.impressao.map(i => `<li>${i}</li>`).join('');
-            document.getElementById('res-forcas').innerHTML = p.forcas.map(f => `<li>${f}</li>`).join('');
+            const balanceNotice = document.getElementById('balance-notice');
+            if (isBalanced) {
+                balanceNotice.classList.remove('hidden');
+            } else {
+                balanceNotice.classList.add('hidden');
+            }
 
-            Object.entries(scores).forEach(([k, v]) => {
-                document.getElementById(`sc-${k}`).innerText = v;
-                if(k === win) document.getElementById(`card-${k}`).classList.add('bg-pink-500/20', 'border', 'border-pink-500/50');
+            document.getElementById('result-title').innerText = PROFILES[win].title;
+            document.getElementById('result-subtitle').innerText = PROFILES[win].sub;
+            document.getElementById('result-description').innerText = PROFILES[win].desc;
+            
+            const maxVal = Math.max(...Object.values(scs));
+            Object.entries(scs).forEach(([k, v]) => {
+                const card = document.getElementById(`card-${k}`);
+                const scoreText = document.getElementById(`sc-${k}`);
+                scoreText.innerText = v;
+                
+                card.className = "text-center p-4 rounded-2xl transition-all border border-transparent";
+                scoreText.classList.remove('text-pink-400');
+
+                if (v === maxVal && v > 0) {
+                    card.classList.add('bg-pink-500/10', 'border-pink-500/30', 'scale-105');
+                    scoreText.classList.add('text-pink-400');
+                }
             });
-            window.scrollTo(0,0);
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     </script>
 </body>
