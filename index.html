@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brainstyle | Inventário de Modelo Mental</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #f472b6;
+            --secondary: #818cf8;
+            --dark-bg: #0b0e14;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--dark-bg);
+            color: #f1f5f9;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .glass-card.selected {
+            background: rgba(244, 114, 182, 0.15);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(244, 114, 182, 0.2);
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: all 0.3s;
+        }
+
+        .selected .option-label {
+            background: var(--primary);
+            color: white;
+        }
+
+        .bg-blob {
+            position: fixed;
+            z-index: -1;
+            filter: blur(80px);
+            opacity: 0.2;
+            border-radius: 50%;
+        }
+
+        .hidden-screen { display: none !important; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in { animation: fadeInUp 0.5s ease-out forwards; }
+
+        .profile-tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+
+    <div class="bg-blob w-96 h-96 bg-pink-500 top-[-100px] left-[-50px]"></div>
+    <div class="bg-blob w-[500px] h-[500px] bg-indigo-600 bottom-[-150px] right-[-100px]"></div>
+
+    <div id="main-container" class="w-full max-w-4xl px-4 py-8 min-h-screen flex flex-col justify-center">
+        
+        <!-- LOGIN -->
+        <section id="login-section" class="flex flex-col items-center text-center animate-in">
+            <h1 class="text-5xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Brainstyle</h1>
+            <p class="text-gray-400 text-lg mb-10">Insira a chave para iniciar a sua análise de perfil.</p>
+            <div class="w-full max-w-sm glass-panel p-8 rounded-[32px] space-y-4">
+                <input type="password" id="pass-input" placeholder="Palavra-passe" class="w-full bg-black/40 border border-white/10 rounded-2xl py-4 px-6 text-center text-white focus:outline-none focus:border-pink-500 text-lg">
+                <button onclick="checkAuth()" class="w-full bg-gradient-to-r from-pink-500 to-indigo-600 py-4 rounded-2xl font-bold uppercase tracking-widest hover:opacity-90 transition-all">Entrar</button>
+                <p id="error-msg" class="text-pink-500 text-sm font-semibold hidden">Chave incorreta. Tente novamente.</p>
+            </div>
+        </section>
+
+        <!-- ORIENTAÇÕES -->
+        <section id="intro-section" class="hidden-screen animate-in">
+            <div class="glass-panel p-8 md:p-12 rounded-[40px] space-y-8">
+                <div class="border-b border-white/10 pb-6">
+                    <h2 class="text-3xl font-black mb-4">Bem-vindo ao Inventário</h2>
+                    <p class="text-gray-300 leading-relaxed mb-4">
+                        Esse inventário tem 18 pares de declarações. Escolha a alternativa (A ou B) que melhor lhe descreve.
+                    </p>
+                </div>
+                <div class="pt-6">
+                    <button onclick="startQuiz()" class="w-full bg-gradient-to-r from-pink-500 to-indigo-600 py-4 rounded-2xl font-bold uppercase tracking-widest">Começar Inventário</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- QUESTIONÁRIO -->
+        <section id="quiz-section" class="hidden-screen flex-1 pt-10">
+            <div class="fixed top-0 left-0 w-full glass-panel z-50 px-6 py-4 flex justify-center">
+                <div class="max-w-4xl w-full flex items-center justify-between">
+                    <span id="page-indicator" class="text-xs font-black uppercase tracking-widest text-indigo-400">Página 1 de 3</span>
+                    <div id="progress-bar" class="flex-1 mx-8 h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div id="progress-fill" class="h-full bg-pink-500 transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="questions-list" class="space-y-8 mt-16 pb-32"></div>
+            <div class="fixed bottom-0 left-0 w-full p-6 flex justify-center bg-gradient-to-t from-black via-black/90 to-transparent">
+                <div class="max-w-4xl w-full flex gap-4">
+                    <button id="prev-btn" onclick="prevPage()" class="hidden flex-1 bg-white/5 border border-white/10 py-4 rounded-2xl font-bold uppercase tracking-widest">Anterior</button>
+                    <button id="next-btn" onclick="nextPage()" class="flex-[2] bg-indigo-600 py-4 rounded-2xl font-bold uppercase tracking-widest">Próxima Página</button>
+                    <button id="finish-btn" onclick="processResults()" class="hidden flex-[2] bg-pink-500 py-4 rounded-2xl font-bold uppercase tracking-widest">Finalizar</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESULTADOS -->
+        <section id="result-section" class="hidden-screen animate-in">
+            <div class="glass-panel rounded-[40px] overflow-hidden p-8 md:p-12">
+                <div class="text-center mb-10">
+                    <span class="text-pink-400 text-[10px] font-black uppercase tracking-[0.3em] mb-4 block">Seu Perfil Dominante</span>
+                    <h2 id="result-title" class="text-5xl font-black mb-2">...</h2>
+                    <p id="result-subtitle" class="text-indigo-400 font-bold uppercase tracking-widest text-xs"></p>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6 mb-12">
+                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <h4 class="text-pink-400 text-[10px] font-black uppercase mb-3">No tempo zero</h4>
+                        <p id="res-tempo" class="text-sm text-gray-300"></p>
+                    </div>
+                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <h4 class="text-pink-400 text-[10px] font-black uppercase mb-3">A impressão de</h4>
+                        <ul id="res-impressao" class="text-xs text-gray-400 space-y-2 list-disc pl-4"></ul>
+                    </div>
+                    <div class="bg-white/5 p-6 rounded-3xl border border-white/10">
+                        <h4 class="text-pink-400 text-[10px] font-black uppercase mb-3">Forças Essenciais</h4>
+                        <ul id="res-forcas" class="text-xs text-gray-400 space-y-2 list-disc pl-4"></ul>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 border-t border-white/5 pt-8">
+                    <div class="text-center p-4 rounded-2xl" id="card-DELIBERADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Deliberador</p><p id="sc-DELIBERADOR" class="text-2xl font-black">0</p></div>
+                    <div class="text-center p-4 rounded-2xl" id="card-CONHECEDOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Conhecedor</p><p id="sc-CONHECEDOR" class="text-2xl font-black">0</p></div>
+                    <div class="text-center p-4 rounded-2xl" id="card-IDEALIZADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Idealizador</p><p id="sc-IDEALIZADOR" class="text-2xl font-black">0</p></div>
+                    <div class="text-center p-4 rounded-2xl" id="card-CONCILIADOR"><p class="text-[10px] uppercase text-gray-500 mb-1">Conciliador</p><p id="sc-CONCILIADOR" class="text-2xl font-black">0</p></div>
+                </div>
+
+                <button onclick="window.location.reload()" class="mt-12 w-full py-4 rounded-xl bg-white/5 border border-white/10 font-bold uppercase tracking-widest">Reiniciar</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const AUTH_KEY = "Brainstyle";
+        const QUESTIONS_PER_PAGE = 6;
+        let currentPage = 1;
+        let userAnswers = {};
+
+        const DATA = [
+            { id: 1, a: "Em uma nova situação, minhas primeiras reações são sentimentos sobre coisas. Só mais tarde eu me torno mais objetivo e reflito melhor.", b: "Em uma nova situação, considero primeiro os fatos. Posso ter consciência dos meus sentimentos, mas quase sempre penso antes de responder.", map: {a: 'CONCILIADOR', b: 'DELIBERADOR'} },
+            { id: 2, a: "Sou naturalmente inventivo. Desenvolvo soluções novas e completas para problemas complexos, mais rapidamente do que faço relacionamentos.", b: "Sou naturalmente amigável, faço relacionamentos mais depressa e mais facilmente do que consigo desenvolver soluções novas e completas para problemas complexos.", map: {a: 'IDEALIZADOR', b: 'CONCILIADOR'} },
+            { id: 3, a: "De modo típico, não tomo decisões rápidas em novas áreas. Hesito, a fim de avaliar mais detalhes sem levar em consideração meus sentimentos.", b: "De modo típico, decido rapidamente nas novas áreas e raras vezes reconsidero a decisão.", map: {a: 'DELIBERADOR', b: 'CONHECEDOR'} },
+            { id: 4, a: "Minhas novas decisões resultam de uma boa lógica que definiu o que está errado. Não sou facilmente desviado de uma resposta simples e lógica por sentimentos ou intuições.", b: "Minhas novas decisões resultam de “ver” como solucionar problemas. Eu “texto quadros mentais” de um modo que não posso descrever facilmente para chegar a duas ou três soluções completas novas.", map: {a: 'CONHECEDOR', b: 'IDEALIZADOR'} },
+            { id: 5, a: "Embora eu possa dar uma reposta para um novo problema, sou melhor para formular e aperfeiçoar um plano a fim de resolvê-lo, incluindo os detalhes necessários.", b: "Embora eu possa dar uma resposta para um novo problema, sou melhor para criar uma nova direção e não tão hábil em refletir sobre os detalhes completos do plano.", map: {a: 'DELIBERADOR', b: 'IDEALIZADOR'} },
+            { id: 6, a: "Sou melhor em resolver problemas complexos, tangíveis, com respostas simples e práticas. Sou mais capaz de conceber o que deve ser feito do que em levar outros a fazerem o que é necessário.", b: "Sou melhor em resolver problemas complexos com sentimentos e discernimentos. Sou melhor como parte de uma equipe ou quando incluo outros.", map: {a: 'CONHECEDOR', b: 'CONCILIADOR'} },
+            { id: 7, a: "De modo geral, reajo antes de pensar. Posso ter conhecimento dos fatos, mas minha primeira reação quase sempre reflete meus sentimentos.", b: "De modo geral, reajo depois de pensar nos fatos. Posso ter consciência dos meus sentimentos, mas minha primeira reação quase sempre reflete fatos e não emoções.", map: {a: 'CONCILIADOR', b: 'DELIBERADOR'} },
+            { id: 8, a: "Sou naturally eficiente. Chego rapidamente às conclusões, especialmente nas novas áreas.", b: "Sou naturalmente detalhista. Colho informações nas áreas novas, a fim de assegurar exatidão antes de decidir.", map: {a: 'CONHECEDOR', b: 'DELIBERADOR'} },
+            { id: 9, a: "Quando trato de um problema desconhecido, tipicamente descubro novas formas de aplicar o que sei. A solução é prática e faz sentido imediato.", b: "Quando trato de um problema desconhecido, tipicamente reúno informações contraditórias para ultrapassar o que já é conhecido. A seguir, ofereço uma direção geral sobre como resolver o problema.", map: {a: 'CONHECEDOR', b: 'IDEALIZADOR'} },
+            { id: 10, a: "A princípio, tomo mais consciência das reações não verbais do que dos fatos em uma situação nova.", b: "A princípio, tomo mais consciência dos fatos em uma situação nova do que das reações não verbais.", map: {a: 'CONCILIADOR', b: 'CONHECEDOR'} },
+            { id: 11, a: "Inicialmente, minhas novas ideias são tão incomuns ou conceituais que as pessoas têm dificuldade para aceitá-las. Posso criar uma nova direção sem considerar o apoio delas.", b: "Inicialmente, quero que todos gostem de mim e de minhas ideias. Sou melhor em criar uma nova direção quando outros apoiam minhas ideias.", map: {a: 'IDEALIZADOR', b: 'CONCILIADOR'} },
+            { id: 12, a: "Sou melhor em apresentar novas soluções práticas e de fácil compreensão.", b: "Sou melhor em oferecer novas ideias que talvez pareçam pouco claras a princípio, mas que redefinem essencialmente o problema de modo que as soluções se seguem.", map: {a: 'CONHECEDOR', b: 'IDEALIZADOR'} },
+            { id: 13, a: "Contribuo mais, comparando metodicamente um novo problema com uma situação passada antes de estabelecer alvos.", b: "Quando se trata de um novo problema, contribuo mais vendo e testando mentalmente novas soluções para estabelecer uma visão geral antes de determinar metas.", map: {a: 'DELIBERADOR', b: 'IDEALIZADOR'} },
+            { id: 14, a: "Sou quase sempre conciso e até brusco, porque raramente noto ou considero as emoções. Chego rapidamente aos resultados.", b: "Levo tempo porque sinto os sentimentos dos outros. No geral, noto ou considero as emoções para chegar a um acordo em que todos se sintam bem tanto a meu respeito como em relação à ideia apresentada.", map: {a: 'CONHECEDOR', b: 'CONCILIADOR'} },
+            { id: 15, a: "Desde que avalio imediatamente as ideias alheias, sou melhor quando encontro soluções mais racionais baseadas na minha experiência.", b: "Desde que reajo espontaneamente à minha intuição sobre os sentimentos das pessoas, sou melhor em encontrar soluções baseadas na minha empatia em relação a outros.", map: {a: 'DELIBERADOR', b: 'CONCILIADOR'} },
+            { id: 16, a: "Sou melhor quando invento estratégias e instruções a longo prazo, diferentes de quaisquer outras que já conhecia antes. Levo mais tempo para explicar minhas ideias e as pessoas ficam então mais entusiasmadas com elas.", b: "Sou melhor quando provoco o entusiasmo das pessoas sobre as possibilidades de projetos já definidos. Levo mais tempo para definir estratégias e instruções a longo prazo.", map: {a: 'IDEALIZADOR', b: 'CONCILIADOR'} },
+            { id: 17, a: "Descubro rapidamente soluções não emocionais para novas situações sem muita análise. Isso é tipicamente tudo que é necessário.", b: "Descubro soluções refletidas para novas situações, avaliando-as metodicamente primeiro e depois fragmentando-as para novas análises.", map: {a: 'CONHECEDOR', b: 'DELIBERADOR'} },
+            { id: 18, a: "Com um problema novo, analiso o que deu errado, colhendo cuidadosamente todos os fatos e comparando-os com as respostas certas dadas no passado ou conhecidas antes de procurar resolver o problema.", b: "Com um problema novo, devo ver e testar várias imagens mentais que solucionem todo o problema ou que mudem inteiramente o método de definição do mesmo antes de tentar resolvê-lo.", map: {a: 'DELIBERADOR', b: 'IDEALIZADOR'} }
+        ];
+
+        const PROFILES = {
+            DELIBERADOR: { 
+                title: "Deliberador(a)", 
+                tempo: "Pensa antes de reagir",
+                impressao: ["Indagador desafiador", "Conhecedor", "Indiferente ou pensativa a princípio", "Complexa e Analítica", "Indutiva"],
+                forcas: ["Alguém que avalia as coisas primeiro e depois aprende", "Usa análise passo a passo para chegar a uma visão geral", "Um planejador", "Uma pessoa multifacetada"]
+            },
+            CONHECEDOR: { 
+                title: "Conhecedor(a)", 
+                tempo: "Resposta lógica, clara",
+                impressao: ["Conclusiva", "Tomada de decisões não emocionais", "Confrontativa", "Simplificada", "Dedutiva"],
+                forcas: ["Alguém que explica as coisas primeiro, sem emoção", "Uma pessoa que vai para a causa e apresenta soluções simples", "Uma pessoa que conserta coisas", "Alguém que soluciona problemas", "Uma pessoa lógica"]
+            },
+            IDEALIZADOR: { 
+                title: "Idealizador(a)", 
+                tempo: "Resposta generalizada ou vaga",
+                impressao: ["Suposição ampla, sem fatos, um estereótipo", "Exploradora de possibilidades", "Inventiva, porém estratégica", "Distante e Dedutiva"],
+                forcas: ["Alguém que propõe soluções e depois as experimenta", "Uma pessoa inventiva, difícil de entender a princípio", "Aceita riscos", "Procura caminhos", "Um visionário"]
+            },
+            CONCILIADOR: { 
+                title: "Conciliador(a)", 
+                tempo: "Reações ou respostas rápidas",
+                impressao: ["Espontânea", "Tomada de decisões rápidas e depois muda as mesmas, age rapidamente", "Mais imaginativa que estratégica", "Informativa, amigável, conversadora, indutiva"],
+                forcas: ["Alguém que imagina rapidamente possibilidades", "Uma pessoa emocional, intuitiva", "Alguém que toma decisões e depois muda de ideia", "Um influenciador, carismático", "Uma pessoa sociável", "Uma pessoa inspiradora"]
+            }
+        };
+
+        function checkAuth() {
+            if (document.getElementById('pass-input').value === AUTH_KEY) {
+                document.getElementById('login-section').classList.add('hidden-screen');
+                document.getElementById('intro-section').classList.remove('hidden-screen');
+            } else { document.getElementById('error-msg').classList.remove('hidden'); }
+        }
+
+        function startQuiz() {
+            document.getElementById('intro-section').classList.add('hidden-screen');
+            document.getElementById('quiz-section').classList.remove('hidden-screen');
+            renderPage();
+        }
+
+        function renderPage() {
+            const start = (currentPage - 1) * QUESTIONS_PER_PAGE;
+            const currentQuestions = DATA.slice(start, start + QUESTIONS_PER_PAGE);
+            document.getElementById('questions-list').innerHTML = currentQuestions.map(q => `
+                <div class="glass-panel p-6 rounded-[32px] animate-in">
+                    <p class="text-[10px] font-black text-gray-500 mb-4 uppercase tracking-[0.2em]">Questão ${q.id}</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div id="q${q.id}a" onclick="pick(${q.id}, 'a')" class="glass-card p-5 rounded-2xl ${userAnswers[q.id] === 'a' ? 'selected' : ''}">
+                            <div class="option-label">A</div><p class="text-sm">${q.a}</p>
+                        </div>
+                        <div id="q${q.id}b" onclick="pick(${q.id}, 'b')" class="glass-card p-5 rounded-2xl ${userAnswers[q.id] === 'b' ? 'selected' : ''}">
+                            <div class="option-label">B</div><p class="text-sm">${q.b}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            updateControls();
+        }
+
+        function pick(id, opt) {
+            userAnswers[id] = opt;
+            renderPage();
+            const count = Object.keys(userAnswers).length;
+            document.getElementById('progress-fill').style.width = `${(count / 18) * 100}%`;
+        }
+
+        function updateControls() {
+            document.getElementById('page-indicator').innerText = `Página ${currentPage} de 3`;
+            document.getElementById('prev-btn').classList.toggle('hidden', currentPage === 1);
+            document.getElementById('next-btn').classList.toggle('hidden', currentPage === 3);
+            document.getElementById('finish-btn').classList.toggle('hidden', currentPage !== 3);
+        }
+
+        function nextPage() { if (currentPage < 3) { currentPage++; renderPage(); } }
+        function prevPage() { if (currentPage > 1) { currentPage--; renderPage(); } }
+
+        function processResults() {
+            const scores = { DELIBERADOR: 0, CONHECEDOR: 0, IDEALIZADOR: 0, CONCILIADOR: 0 };
+            Object.entries(userAnswers).forEach(([id, opt]) => scores[DATA[id-1].map[opt]]++);
+            const win = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+            
+            document.getElementById('quiz-section').classList.add('hidden-screen');
+            document.getElementById('result-section').classList.remove('hidden-screen');
+            
+            const p = PROFILES[win];
+            document.getElementById('result-title').innerText = p.title;
+            document.getElementById('res-tempo').innerText = p.tempo;
+            document.getElementById('res-impressao').innerHTML = p.impressao.map(i => `<li>${i}</li>`).join('');
+            document.getElementById('res-forcas').innerHTML = p.forcas.map(f => `<li>${f}</li>`).join('');
+
+            Object.entries(scores).forEach(([k, v]) => {
+                document.getElementById(`sc-${k}`).innerText = v;
+                if(k === win) document.getElementById(`card-${k}`).classList.add('bg-pink-500/20', 'border', 'border-pink-500/50');
+            });
+            window.scrollTo(0,0);
+        }
+    </script>
+</body>
+</html>
